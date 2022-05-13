@@ -4,28 +4,22 @@ import discord
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils.manage_commands import create_choice, create_option
-from flask import Flask
 import flask
-from threading import Thread
-
-app = Flask('')
-
-@app.route('/')
-def home():
-    return 'Hello World'
-
-def run():
-  app.run(host='0.0.0.0',port=8080)
-
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-keep_alive()
 
 
 
 # app.py
+def createflasksite():
+  from flask import Flask
+
+  app = Flask(__name__)
+
+  @app.route('/')
+  def index():
+    return '<h1>Nikomaker (WIP)</h1>'
+
+  if __name__ == '__main__':
+    app.run(host='0.0.0.0')
 
 
 nikoface = 'niko_neutral.png'
@@ -66,30 +60,28 @@ async def _reload():
       description = 'If you would like the text to be gradually read out.',
       option_type = 5,
       required = False,
+      choices = [
+        create_choice(
+          value = 1,
+          name = 'True'
+        ),
+        create_choice(
+          value = 0,
+          name = 'False'
         )
       ]
     )
+  ]
+)
 
 
-# , animated:int=0
-async def _textbox(ctx:SlashContext, text:str, expression:str):
-  animated = 1
-  print(animated)
-  if animated not in vars():
-    animation = 0
-  animated = int(animated)
+
+async def _textbox(ctx:SlashContext, text:str, expression:str, animation:int):
   if animation == 0:
     functions.maketextbox(text, expression).save('drafts/draft.png')
-    newimg = 'drafts/draft.png'
   else:
-    print('it is functioning sort of!')
     functions.makeanimatedtextbox(text, expression, 1)
-    newimg = 'drafts/animateddraft.gif'
-  await ctx.send(file=discord.File(newimg))
-
-#@client.event
-#async def on_ready():
-  #createflasksite()
+  await ctx.send(file=discord.File('drafts/draft.png'))
 
 #print(commands.bot.is_ws_ratelimited())
 
@@ -97,6 +89,4 @@ async def _textbox(ctx:SlashContext, text:str, expression:str):
 #else:
   #print('The bot is currently being ratelimited, please wait warmly...')
 client.run(os.environ['token'])
-#note for people viewing source: this is a bot in the testing server, don't mind it client.run('OTc0NjYxNzI4NTE4NDE0NDM3.G8C-QY.VP-Df_QY_ZQ1puU0se0JK_09zshm7b4BPKXARo')
-
-
+createflasksite()
