@@ -7,12 +7,13 @@ from discord_slash.utils.manage_commands import create_choice, create_option
 from flask import Flask
 import flask
 from threading import Thread
+from datetime import datetime
 
 app = Flask('')
 
 @app.route('/')
 def home():
-    return 'Hello World'
+    return '<h1>Nikomaker (WIP)</h1>'
 
 def run():
   app.run(host='0.0.0.0',port=8080)
@@ -72,18 +73,21 @@ async def _reload():
 
 
 # , animated:int=0
-async def _textbox(ctx:SlashContext, text:str, expression:str):
-  animated = 1
-  print(animated)
-  if animated not in vars():
-    animation = 0
+async def _textbox(ctx:SlashContext, text:str, expression:str, animated:bool=False):
+  displayvars = locals()
+  del displayvars['ctx']
   animated = int(animated)
-  if animation == 0:
+  animated = int(animated)
+  print('---------------------------------------')
+  print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"), '\n\n', displayvars, '\n\n', ctx.author)
+  print('----------------------------------------\n')
+  if len(text) > 100:
+    animated = 0
+  if animated == 0:
     functions.maketextbox(text, expression).save('drafts/draft.png')
     newimg = 'drafts/draft.png'
   else:
-    print('it is functioning sort of!')
-    functions.makeanimatedtextbox(text, expression, 1)
+    functions.makeanimatedtextbox(text, expression)
     newimg = 'drafts/animateddraft.gif'
   await ctx.send(file=discord.File(newimg))
 

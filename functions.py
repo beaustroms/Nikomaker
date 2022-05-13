@@ -80,3 +80,9 @@ def createflasksite():
   if __name__ == '__main__':
     app.run(host='0.0.0.0')
 
+def terminaloutput(*args):
+  print('-----------------------------------------')
+  for i in args:
+    print(i)
+  print('-----------------------------------------')
+
