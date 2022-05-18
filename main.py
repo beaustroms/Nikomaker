@@ -3,9 +3,8 @@ import os
 import discord
 from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils.manage_commands import create_choice, create_option
+from discord_slash.utils.manage_commands import create_option
 from flask import Flask
-import flask
 from threading import Thread
 from datetime import datetime
 
@@ -80,16 +79,18 @@ async def _textbox(ctx:SlashContext, text:str, expression:str, animated:bool=Fal
   print('---------------------------------------')
   print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"), '\n\n', displayvars, '\n\n', ctx.author)
   print('----------------------------------------\n')
-  if len(text) > 100:
-    animated = 0
   if animated == 0:
     functions.maketextbox(text, expression).save('drafts/draft.png')
     newimg = 'drafts/draft.png'
+    await ctx.send(file=discord.File(newimg))
   else:
+    oldtime = datetime.now()
+    await ctx.defer()
     functions.makeanimatedtextbox(text, expression)
+    newtime = datetime.now()
+    print(f'Took {newtime-oldtime} seconds')
     newimg = 'drafts/animateddraft.gif'
-  await ctx.send(file=discord.File(newimg))
-
+    await ctx.send(file=discord.File(newimg))
 #@client.event
 #async def on_ready():
   #createflasksite()

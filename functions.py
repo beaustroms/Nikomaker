@@ -3,10 +3,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 import textwrap
 import os
-import discord
-from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils.manage_commands import create_choice, create_option
+from discord_slash.utils.manage_commands import create_choice
 import math
 # Don't change this, this imports functions which are used below
 
@@ -15,6 +12,7 @@ def percentgen(num1, num2):
 
 # \/ copied from https://levelup.gitconnected.com/how-to-properly-calculate-text-size-in-pil-images-17a2cc6f51fd \/
 def get_text_dimensions(text_string, font):
+    text_string = str(text_string)
     # https://stackoverflow.com/a/46220683/9263761
     ascent, descent = font.getmetrics()
 
@@ -23,29 +21,38 @@ def get_text_dimensions(text_string, font):
 
     return (text_width, text_height)
 
-def maketextbox(text, expression, wrap=25):
+def bettertextwrap(text, font, size):
+  currentsize = 0
+  outlist = []
+  for i in range(len(text)):
+    width, height = get_text_dimensions(i, font)
+    currentsize += width
+    if currentsize > size:
+      outlist.append(text[:i-1])
+      text = text[i:]
+      currentsize = width
+  return(outlist)
+
+def maketextbox(text, expression, wrap=35):
   fontsize = 25
   if len(text) > 100:
     percent = percentgen(100, len(text))
-    print(percent)
     fontsize = math.floor((fontsize*percent)*(2))
-    print(fontsize, fontsize*percent*(2), percent)
     wrap = round((wrap/(percent)*1.3)/2)
   if fontsize > 25:
     fontsize = 25
-  fontshot = ImageFont.truetype('/home/runner/Nikomaker-testing/Font/Terminus (TTF) Bold 700.ttf', fontsize)
-  # load the font, you can remove Bold and change 700 to 500 for non bold text. 30 is the font size.
-  text = textwrap.wrap(text, width=wrap)
+  fontshot = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', fontsize)
+  # load the font, you can remove Bold and change 700 to 500 for non bold text. 35 is the font size.
+  text_width, text_height = get_text_dimensions(text, fontshot)
+  text = textwrap.wrap(text, width=wrap, break_long_words=True)
   # Wraps the text, lowering width wraps it earlier, increasing it wraps it later
   textbox = Image.open('Textbox.png').convert('RGBA')
   editbox = ImageDraw.Draw(textbox)
-  print('Amount of newlines: ',len(text))
   newlinecount = len(text)+1
-  print(text)
   text = '\n'.join(text)
   text_width, text_height = get_text_dimensions(text, fontshot)
   
-  if newlinecount > 4:
+  if newlinecount > 5:
     img = Image.new('RGBA', ((450, text_height*newlinecount)), (255, 0, 0, 0))
     imgedit = ImageDraw.Draw(img)
     imgedit.text((0, 0), text, font=fontshot, fill=(255, 255, 255))
@@ -61,7 +68,7 @@ def maketextbox(text, expression, wrap=25):
     editbox.text((20, 15), text, font=fontshot, fill=(255, 255, 255))
 
     
-  nikoimgface = Image.open(f'/home/runner/Nikomaker-testing/Niko_expressions/{expression}').convert('RGBA')
+  nikoimgface = Image.open(f'/home/runner/Nikomaker/Niko_expressions/{expression}').convert('RGBA')
   nikoimgface = nikoimgface.resize((96, 96))
   textbox.paste(nikoimgface, (495, 15), nikoimgface)
   return(textbox)
@@ -97,16 +104,23 @@ def entitytoworldmachine(directory):
       newname = f.replace('en_', 'TWM_')
       os.rename(f, newname)
 
+
+
 def makeanimatedtextbox(text, expression):
   frames = []
-  textiter = []
+  durations = []
   for i in range(len(text)):
-    new_frame = maketextbox(text[:i], expression, 25)
-    frames.append(new_frame)
-  for i in range(30):
-    frames.append(maketextbox(text, expression, 25))
+    try:
+      new_frame = maketextbox(text[:i], expression, 25)
+      frames.append(new_frame)
+    except:
+      pass
+  frames.append(maketextbox(text, expression))
+  for i in frames:
+    durations.append(50)
+  durations[-1] = 4500
   frames[0].save('drafts/animateddraft.gif', format='GIF',
-               append_images=frames[1:], save_all=True, duration=100, loop=0)
+               append_images=frames[1:], save_all=True, duration=durations, loop=0)
 
 def createflasksite():
   from flask import Flask
