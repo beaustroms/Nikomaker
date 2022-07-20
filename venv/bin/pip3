@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/captain8771/PycharmProjects/Nikomaker/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
