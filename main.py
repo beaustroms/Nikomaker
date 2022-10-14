@@ -76,9 +76,6 @@ async def _textbox(ctx:SlashContext, text:str, expression:str, animated:bool=Fal
   del displayvars['ctx']
   animated = int(animated)
   animated = int(animated)
-  print('---------------------------------------')
-  print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"), '\n\n', displayvars, '\n\n', ctx.author)
-  print('----------------------------------------\n')
   if animated == 0:
     functions.maketextbox(text, expression).save('drafts/draft.png')
     newimg = 'drafts/draft.png'
@@ -91,16 +88,16 @@ async def _textbox(ctx:SlashContext, text:str, expression:str, animated:bool=Fal
     print(f'Took {newtime-oldtime} seconds')
     newimg = 'drafts/animateddraft.gif'
     await ctx.send(file=discord.File(newimg))
-#@client.event
-#async def on_ready():
-  #createflasksite()
 
-#print(commands.bot.is_ws_ratelimited())
 
-#if not commands.bot.is_ws_ratelimited():
-#else:
-  #print('The bot is currently being ratelimited, please wait warmly...')
-client.run(os.environ['token'])
+
+while True:
+  try:
+    client.run(os.environ['token'])
+  except Exception as e:
+    e = str(e)
+    if "<" in e:
+      os.system("kill 1")
 #note for people viewing source: this is a bot in the testing server, don't mind it client.run('OTc0NjYxNzI4NTE4NDE0NDM3.G8C-QY.VP-Df_QY_ZQ1puU0se0JK_09zshm7b4BPKXARo')
 
 

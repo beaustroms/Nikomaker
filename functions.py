@@ -27,15 +27,10 @@ def get_text_dimensions(text_string, font):
     except:
       return(0, 0)
 
-'''def besttextwrap(text, font):
-  text = str(text)
-  ascent, descent = font.getmetrics()
-  print(font.getmask(text).getbbox())'''
-
 def bettertextwrap(text, size):
   text = text.replace('\n', '')
-  fontshot = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', 25)
-  font = fontshot
+  font = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', 25)
+  font = font
   currentsize = 0
   outlist = []
   for i in range(len(text)):
@@ -71,23 +66,23 @@ def maketextbox(text, expression, wrap=35):
     wrap = round((wrap/(percent)*1.3)/2)
   if fontsize > 25:
     fontsize = 25
-  fontshot = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', fontsize)
+  font = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', fontsize)
   # load the font, you can remove Bold and change 700 to 500 for non bold text. 35 is the font size.
-  text_width, text_height = get_text_dimensions(text, fontshot)
+  text_width, text_height = get_text_dimensions(text, font)
   #text = textwrap.wrap(text, width=wrap, break_long_words=True)
-  text = bettertextwrap(text, 400)
+  text = textwrap(text, 400)
   # Wraps the text, lowering width wraps it earlier, increasing it wraps it later
   textbox = Image.open('Textbox.png').convert('RGBA')
   editbox = ImageDraw.Draw(textbox)
   newlinecount = len(text)+1
   text = '\n'.join(text)
-  text_width, text_height = get_text_dimensions(text, fontshot)
+  text_width, text_height = get_text_dimensions(text, font)
   
   
   if newlinecount > 5:
     img = Image.new('RGBA', ((450, text_height*newlinecount)), (255, 0, 0, 0))
     imgedit = ImageDraw.Draw(img)
-    imgedit.text((0, 0), text, font=fontshot, fill=(255, 255, 255))
+    imgedit.text((0, 0), text, font=font, fill=(255, 255, 255))
     img.save('drafts/unshifttextimg.png', 'PNG')
     img = img.resize((500, 100), Image.ANTIALIAS)
     textbox.paste(img, (20, 15), img)
@@ -97,7 +92,7 @@ def maketextbox(text, expression, wrap=35):
     # Wraps the text, lowering width wraps it earlier, increasing it wraps it later
     textbox = Image.open('Textbox.png').convert('RGBA')
     editbox = ImageDraw.Draw(textbox)
-    editbox.text((20, 15), text, font=fontshot, fill=(255, 255, 255))
+    editbox.text((20, 15), text, font=font, fill=(255, 255, 255))
     nikoimgface = Image.open(f'/home/runner/Nikomaker/Niko_expressions/{expression}').convert('RGBA')
     nikoimgface = nikoimgface.resize((96, 96))
     
@@ -166,6 +161,47 @@ def createflasksite():
 
   if __name__ == '__main__':
     app.run(host='0.0.0.0')
+
+def textwrap(text, size):
+  text = text.replace('\n', '')
+  fontsize = 25
+  font = ImageFont.truetype('/home/runner/Nikomaker/Font/Terminus (TTF) Bold 700.ttf', fontsize)
+  text = text.split()
+  outtext = ""
+  newlinecount = 1
+  outlist = []
+  # removes newlines from the entered text, splits it into a list of words. Also loads the Oneshot font (Terminus (TTF) Bold 700)
+  for i in enumerate(text):
+    e = i[1]
+    print(e)
+    successful = False
+    breakcount = 0
+    while not successful:
+      if get_text_dimensions(e, font)[0] > size:
+        outtext = outtext + ("\n".join(bettertextwrap(e, size)))
+      if (get_text_dimensions(outtext, font)[0] + get_text_dimensions(e, font)[0]) < size:
+        print("1")
+        if breakcount > 0:
+          print("a")
+          while breakcount > 0:
+            outtext = outtext+e[-breakcount]+" "
+            breakcount -= 1
+            print("b")
+          successful = True
+          print("c")
+        else: 
+          successful = True
+          outtext = outtext+e+" "
+        newlinecount += 1
+      else:
+        print("2")
+        outlist.append(outtext)
+        outtext = ""
+        e = ""
+        successful = False
+    print("\n".join(outlist))
+  return(outlist)
+  # Logic: Split text into list, check each value of list and make sure it is not larger than size, split off x letters to make it fit if needed. Iterate over list, check to ensure that sizeOf(string + new entry) is not larger than size, if it is larger add newline, if it is not append it.
 
 def terminaloutput(*args):
   print('-----------------------------------------')
